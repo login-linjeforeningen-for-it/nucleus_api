@@ -463,8 +463,8 @@ const Questions = [
     },
     {
         id: 77,
-        title_no: "Hvem har den VERSTE drikken? (kanskje noen kan gi tips)",
-        title_en: "Who has the WORST drink? (maybe someone can help)",
+        title_no: "Hvem har den VERSTE drinken? (kanskje noen kan gi tips)",
+        title_en: "Who has the WORST drink? (maybe someone can give tips)",
         categories: ["Party"],
     },
     {
@@ -482,7 +482,7 @@ const Questions = [
     {
         id: 80,
         title_no: "Hvem er alltid syk?",
-        title_en: "Who is always sick?",
+        title_en: "Who is always ill?",
         categories: ["Party"],
     },
     {
@@ -529,8 +529,8 @@ const Questions = [
     },
     {
         id: 88,
-        title_no: "Hvem har mest viljestyrke",
-        title_en: "Who has the most willpower",
+        title_no: "Hvem har mest viljestyrke?",
+        title_en: "Who has the most willpower?",
         categories: ["Party"],
     },
     {
@@ -691,8 +691,8 @@ const Questions = [
     },
     {
         id: 115,
-        title_no: "Har høyest body count",
-        title_en: "Has the highest body count",
+        title_no: "Har høyest body count?",
+        title_en: "Has the highest body count?",
         categories: ["Party", "Wild"],
     },
     {
@@ -787,8 +787,8 @@ const Questions = [
     },
     {
         id: 131,
-        title_no: "Kommer til å havne i fengsel",
-        title_en: "Will end up in prison",
+        title_no: "Kommer til å havne i fengsel?",
+        title_en: "Will end up in prison?",
         categories: ["Party"],
     },
     {
@@ -1795,8 +1795,8 @@ const Questions = [
     },
     {
         id: 298,
-        title_no: "Drar alltid hjem sist fra byen",
-        title_en: "Always goes home last from the city",
+        title_no: "Drar alltid hjem sist fra bye?",
+        title_en: "Always comes home last from parties?",
         categories: ["Party"],
     },
     {
@@ -1897,8 +1897,8 @@ const Questions = [
     },
     {
         id: 315,
-        title_no: "Prater mest 🧢",
-        title_en: "Talks the most 🧢",
+        title_no: "Prater mest 🧢?",
+        title_en: "Talks the most 🧢?",
         categories: ["Party"],
     },
     {
@@ -1909,8 +1909,8 @@ const Questions = [
     },
     {
         id: 317,
-        title_no: "Sender flest meldinger på Tinder",
-        title_en: "Sends the most messages on Tinder",
+        title_no: "Sender flest meldinger på Tinder?",
+        title_en: "Sends the most messages on Tinder?",
         categories: ["Party"],
     },
     {
@@ -2155,8 +2155,8 @@ const Questions = [
     },
     {
         id: 358,
-        title_no: "Har dårligst humor",
-        title_en: "Has the worst humor",
+        title_no: "Har dårligst humor?",
+        title_en: "Has the worst humor?",
         categories: ["Party"],
     },
     {
@@ -2185,8 +2185,8 @@ const Questions = [
     },
     {
         id: 363,
-        title_no: "Har hatt en one night stand med en kollega",
-        title_en: "Has had a one night stand with a colleague",
+        title_no: "Har hatt en one night stand med en kollega?",
+        title_en: "Has had a one night stand with a colleague?",
         categories: ["Party", "Wild"],
     },
     {
@@ -2239,32 +2239,32 @@ const Questions = [
     },
     {
         id: 372,
-        title_no: "Har spionert på en eks-kjæreste",
-        title_en: "Has spied on an ex-boyfriend",
+        title_no: "Har spionert på en eks-kjæreste?",
+        title_en: "Has spied on an ex-boyfriend?",
         categories: ["Party"],
     },
     {
         id: 373,
-        title_no: "Gjør noe dumt i kveld",
-        title_en: "Does something stupid tonight",
+        title_no: "Gjør noe dumt i kveld?",
+        title_en: "Does something stupid tonight?",
         categories: ["Party"],
     },
     {
         id: 374,
-        title_no: "Mest sannsynlig til å sovne på jobb",
-        title_en: "Most likely to fall asleep at work",
+        title_no: "Mest sannsynlig til å sovne på jobb?",
+        title_en: "Most likely to fall asleep at work?",
         categories: ["Party"],
     },
     {
         id: 375,
-        title_no: "Har mest sminke i vesken",
-        title_en: "Has the most makeup in their bag",
+        title_no: "Har mest sminke i vesken?",
+        title_en: "Has the most makeup in their bag?",
         categories: ["Party"],
     },
     {
         id: 376,
-        title_no: "Har hatt seg med noen på en offentlig strand",
-        title_en: "Has made out with someone on a public beach",
+        title_no: "Har hatt seg med noen på en offentlig strand?",
+        title_en: "Has made out with someone on a public beach?",
         categories: ["Party"],
     },
     {
@@ -2306,7 +2306,7 @@ const Questions = [
     {
         id: 383,
         title_no: "Ser på The Kardashians?",
-        title_en: "Watches The Kardashians",
+        title_en: "Watches The Kardashians?",
         categories: ["Party"],
     },
     {
