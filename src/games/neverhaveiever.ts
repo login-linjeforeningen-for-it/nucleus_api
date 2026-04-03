@@ -895,8 +895,8 @@ const NeverHaveIEver = [
     },
     {
         id: 149,
-        title_no: "Jeg har aldri deltatt i en orgie",
-        title_en: "Never have I ever participated in an orgy",
+        title_no: "Jeg har aldri deltatt i en orgie.",
+        title_en: "Never have I ever participated in an orgy.",
         categories: ["Party", "Wild"],
     },
     {
@@ -1142,7 +1142,7 @@ const NeverHaveIEver = [
     {
         id: 190,
         title_no: "Jeg har aldri trodd på synske.",
-        title_en: "Never have I ever believed in psychics",
+        title_en: "Never have I ever believed in psychics.",
         categories: ["Party"],
     },
     {
@@ -1615,8 +1615,8 @@ const NeverHaveIEver = [
     },
     {
         id: 269,
-        title_no: "Jeg har aldri knust en TV",
-        title_en: "Never have I ever broken a TV",
+        title_no: "Jeg har aldri knust en TV.",
+        title_en: "Never have I ever broken a TV.",
         categories: ["Party"],
     },
     {
@@ -2023,7 +2023,7 @@ const NeverHaveIEver = [
     },
     {
         id: 353,
-        title_no: "Jeg har aldri brukt vibrator",
+        title_no: "Jeg har aldri brukt vibrator.",
         title_en: "Never have I ever used a vibrator.",
         categories: ["Party", "Wild"],
     },
@@ -2275,8 +2275,8 @@ const NeverHaveIEver = [
     },
     {
         id: 395,
-        title_no: "Jeg har aldri skulket",
-        title_en: "Never have I ever skipped school",
+        title_no: "Jeg har aldri skulket.",
+        title_en: "Never have I ever skipped school.",
         categories: ["Party"],
     },
     {
