@@ -16,6 +16,11 @@ function normalizeRedirectUri(value: string | undefined) {
 }
 
 export default async function authLogin(req: FastifyRequest<{ Querystring: LoginQuery }>, res: FastifyReply) {
+    if (!config.auth.clientId) {
+        req.log.error('Missing AUTHENTIK_CLIENT_ID for auth login')
+        return res.status(500).send({ error: 'Authentication is not configured' })
+    }
+
     const redirectUri = normalizeRedirectUri(req.query.redirect_uri)
     const target = req.query.target || 'app'
     const state = Buffer.from(JSON.stringify({ redirectUri, target })).toString('base64url')

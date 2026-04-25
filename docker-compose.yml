@@ -8,6 +8,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8100:8080"
+    env_file:
+      - ../queenbee/.env
     depends_on:
       app_api_database:
         condition: service_healthy

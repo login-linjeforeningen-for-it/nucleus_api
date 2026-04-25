@@ -42,6 +42,11 @@ export default async function authCallback(
     req: FastifyRequest<{ Querystring: { code?: string, state?: string } }>,
     res: FastifyReply
 ) {
+    if (!config.auth.clientId || !config.auth.clientSecret) {
+        req.log.error('Missing Authentik OAuth configuration for auth callback')
+        return res.status(500).send({ error: 'Authentication is not configured' })
+    }
+
     const { code, state } = req.query
     if (!code) {
         return res.status(400).send({ error: 'Missing authorization code' })
