@@ -7,7 +7,8 @@
     "type": "module",
     "scripts": {
         "start": "bun src/index.ts",
-        "test": "bun scripts/test-notifications-e2e.mjs"
+        "test": "bun scripts/test-notifications-e2e.mjs && bun scripts/test-desktop-updates-e2e.mjs",
+        "test:desktop": "bun scripts/test-desktop-updates-e2e.mjs"
     },
     "devDependencies": {
         "@types/node": "^25.6.0",

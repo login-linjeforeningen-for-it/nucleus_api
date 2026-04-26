@@ -4,6 +4,7 @@ import config from '#constants'
 
 let pool: Pool | null = null
 let initialized = false
+let initializationPromise: Promise<void> | null = null
 
 function mapScheduledNotification(row: Record<string, unknown>): ScheduledNotificationRecord {
     return {
@@ -72,6 +73,21 @@ export async function initializeDatabase() {
         return
     }
 
+    if (initializationPromise) {
+        await initializationPromise
+        return
+    }
+
+    initializationPromise = initializeDatabaseSchema()
+    try {
+        await initializationPromise
+        initialized = true
+    } finally {
+        initializationPromise = null
+    }
+}
+
+async function initializeDatabaseSchema() {
     const db = getPool()
     if (!db) {
         return
@@ -131,7 +147,6 @@ export async function initializeDatabase() {
         ON app_notification_schedules (status, scheduled_at)
     `)
 
-    initialized = true
 }
 
 export async function listScheduledNotifications(limit = 50) {
