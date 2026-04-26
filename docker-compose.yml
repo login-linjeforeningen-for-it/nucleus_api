@@ -16,6 +16,10 @@ services:
         condition: service_healthy
     environment:
       - APP_API_DATABASE_URL=postgresql://app_api:app_api@app_api_database:5432/app_api
+      - APP_API_PUBLIC_URL=${APP_API_PUBLIC_URL:-https://app.login.no}
+      - APP_API_DESKTOP_UPDATES_DIR=/app/data/desktop
+    volumes:
+      - ${APP_API_DESKTOP_UPDATES_DIR:-./data/desktop}:/app/data/desktop
     mem_limit: 1g
     cpus: "2.0"
 

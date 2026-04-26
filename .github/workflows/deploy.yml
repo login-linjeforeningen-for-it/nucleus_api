@@ -1,0 +1,43 @@
+name: Deploy App API
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: app-api-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Push app-api to server
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_HOST: ${{ secrets.APP_API_DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.APP_API_DEPLOY_USER }}
+      DEPLOY_KEY: ${{ secrets.APP_API_DEPLOY_KEY }}
+      DEPLOY_PATH: ${{ secrets.APP_API_DEPLOY_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Deploy with SSH
+        if: ${{ env.DEPLOY_HOST != '' && env.DEPLOY_USER != '' && env.DEPLOY_KEY != '' && env.DEPLOY_PATH != '' }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/app-api-deploy
+          chmod 600 ~/.ssh/app-api-deploy
+          ssh -i ~/.ssh/app-api-deploy -o StrictHostKeyChecking=no "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && git pull --ff-only && docker compose up -d --build"
