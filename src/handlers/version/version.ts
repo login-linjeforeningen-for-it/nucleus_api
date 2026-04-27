@@ -3,13 +3,15 @@ import isVersionBelow from '#utils/notifications/isVersionBelow.ts'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 type VersionQuery = {
-    version: string
-    lang?: 'no' | 'en'
+    version?: string
+    lang?: string
 }
 
 export default async function VersionHandler(req: FastifyRequest, res: FastifyReply) {
-    const { version, lang = 'en' } = req.query as VersionQuery
-    const forceUpdate = isVersionBelow(version, config.minVersion)
+    const { version, lang: queryLang } = req.query as VersionQuery
+    const currentVersion = version?.trim() || '0.0.0'
+    const lang = queryLang === 'no' ? queryLang : 'en'
+    const forceUpdate = isVersionBelow(currentVersion, config.minVersion)
 
     const updateMessages = {
         no: {
