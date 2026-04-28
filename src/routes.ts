@@ -1,29 +1,25 @@
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify'
-import getIndex from './handlers/index.ts'
+import index from './handlers/index.ts'
 import {
-    getGames,
-    getNeverHaveIEver,
-    getOkRedFlagDealBreaker,
-    getQuestions,
+    games,
+    neverHaveIEver,
+    questionsList,
+    redFlags,
 } from './handlers/games.ts'
-import VersionHandler from './handlers/version.ts'
-import { authCallback, authLogin, authMe } from './handlers/auth.ts'
+import version from './handlers/version.ts'
+import { callback, login, me } from './handlers/auth.ts'
 import {
-    deleteScheduledNotificationHandler,
-    getNotificationsHandler,
-    getScheduledNotificationsHandler,
-    postNotificationHandler,
-    postScheduledNotificationHandler,
-    resendNotificationHandler,
-    runScheduledNotificationHandler,
-    subscribeHandler,
-    unsubscribeHandler,
+    cancel,
+    history,
+    resend,
+    runNow,
+    schedule,
+    scheduled,
+    send,
+    subscribe,
+    unsubscribe,
 } from './handlers/notifications.ts'
-import {
-    getDesktopDownloadHandler,
-    getDesktopManifestHandler,
-    getDesktopUpdateHandler,
-} from './handlers/desktop.ts'
+import { download, manifest, update } from './handlers/desktop.ts'
 
 /**
  * Defines the routes available in the API.
@@ -32,37 +28,31 @@ import {
  * @param _ Fastify Plugin Options
  */
 export default async function apiRoutes(fastify: FastifyInstance, _: FastifyPluginOptions) {
-    // Index handler
-    fastify.get('/', getIndex)
+    fastify.get('/', index)
 
-    // Game handlers
-    fastify.get('/games', getGames)
-    fastify.get('/questions', getQuestions)
-    fastify.get('/okredflagdealbreaker', getOkRedFlagDealBreaker)
-    fastify.get('/neverhaveiever', getNeverHaveIEver)
+    fastify.get('/games', games)
+    fastify.get('/questions', questionsList)
+    fastify.get('/okredflagdealbreaker', redFlags)
+    fastify.get('/neverhaveiever', neverHaveIEver)
 
-    // Version handler
-    fastify.get('/version',VersionHandler)
+    fastify.get('/version', version)
 
-    // Desktop app update handlers
-    fastify.get('/desktop', getDesktopManifestHandler)
-    fastify.get('/desktop/:target/:currentVersion', getDesktopUpdateHandler)
-    fastify.get('/desktop/:target/:arch/:currentVersion', getDesktopUpdateHandler)
-    fastify.get('/desktop/download/:file', getDesktopDownloadHandler)
+    fastify.get('/desktop', manifest)
+    fastify.get('/desktop/:target/:currentVersion', update)
+    fastify.get('/desktop/:target/:arch/:currentVersion', update)
+    fastify.get('/desktop/download/:file', download)
 
-    // Auth handlers
-    fastify.get('/auth/login', authLogin)
-    fastify.get('/auth/callback', authCallback)
-    fastify.get('/auth/me', authMe)
+    fastify.get('/auth/login', login)
+    fastify.get('/auth/callback', callback)
+    fastify.get('/auth/me', me)
 
-    // Notification handlers
-    fastify.post('/subscribe', subscribeHandler)
-    fastify.post('/unsubscribe', unsubscribeHandler)
-    fastify.get('/notifications', getNotificationsHandler)
-    fastify.post('/notifications', postNotificationHandler)
-    fastify.post('/notifications/:id/resend', resendNotificationHandler)
-    fastify.get('/notifications/scheduled', getScheduledNotificationsHandler)
-    fastify.post('/notifications/scheduled', postScheduledNotificationHandler)
-    fastify.delete('/notifications/scheduled/:id', deleteScheduledNotificationHandler)
-    fastify.post('/notifications/scheduled/:id/send', runScheduledNotificationHandler)
+    fastify.post('/subscribe', subscribe)
+    fastify.post('/unsubscribe', unsubscribe)
+    fastify.get('/notifications', history)
+    fastify.post('/notifications', send)
+    fastify.post('/notifications/:id/resend', resend)
+    fastify.get('/notifications/scheduled', scheduled)
+    fastify.post('/notifications/scheduled', schedule)
+    fastify.delete('/notifications/scheduled/:id', cancel)
+    fastify.post('/notifications/scheduled/:id/send', runNow)
 }

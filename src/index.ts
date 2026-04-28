@@ -1,7 +1,7 @@
 import cors from '@fastify/cors'
 import Fastify from 'fastify'
 import routes from './routes.ts'
-import getIndex from './handlers/index.ts'
+import index from './handlers/index.ts'
 import notificationScheduler from './plugins/notificationScheduler.ts'
 
 const fastify = Fastify({
@@ -17,7 +17,7 @@ const port = Number(process.env.PORT) || 8080
 
 fastify.register(routes, { prefix: '/api' })
 fastify.register(notificationScheduler)
-fastify.get('/', getIndex)
+fastify.get('/', index)
 
 async function start() {
     try {

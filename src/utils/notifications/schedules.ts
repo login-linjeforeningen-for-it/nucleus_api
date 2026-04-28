@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { getPool, initializeDatabase, requirePool } from '#db'
 
-type CreateScheduledNotificationInput = {
+type ScheduleInput = {
     title: string
     body: string
     topic: string
@@ -10,7 +10,7 @@ type CreateScheduledNotificationInput = {
     createdBy?: string | null
 }
 
-export async function createScheduledNotification(input: CreateScheduledNotificationInput) {
+export async function createSchedule(input: ScheduleInput) {
     const db = requirePool()
     await initializeDatabase()
     const id = randomUUID()
@@ -33,7 +33,7 @@ export async function createScheduledNotification(input: CreateScheduledNotifica
     return map(result.rows[0])
 }
 
-export async function cancelScheduledNotification(id: string) {
+export async function cancelSchedule(id: string) {
     const db = requirePool()
     await initializeDatabase()
     const result = await db.query(
@@ -50,14 +50,14 @@ export async function cancelScheduledNotification(id: string) {
     return result.rows[0] ? map(result.rows[0]) : null
 }
 
-export async function getScheduledNotification(id: string) {
+export async function getSchedule(id: string) {
     const db = requirePool()
     await initializeDatabase()
     const result = await db.query(`SELECT * FROM app_notification_schedules WHERE id = $1`, [id])
     return result.rows[0] ? map(result.rows[0]) : null
 }
 
-export async function listScheduledNotifications(limit = 50) {
+export async function listSchedules(limit = 50) {
     const db = requirePool()
     await initializeDatabase()
     const result = await db.query(
@@ -71,7 +71,7 @@ export async function listScheduledNotifications(limit = 50) {
     return result.rows.map(map)
 }
 
-export async function claimDueScheduledNotifications(limit = 5) {
+export async function claimDueSchedules(limit = 5) {
     const db = getPool()
     if (!db) {
         return []
@@ -110,7 +110,7 @@ export async function claimDueScheduledNotifications(limit = 5) {
     }
 }
 
-export async function markScheduledNotificationSent(id: string, history: AppNotificationHistoryEntry) {
+export async function markSent(id: string, history: AppNotificationHistoryEntry) {
     const db = requirePool()
     const result = await db.query(
         `UPDATE app_notification_schedules
@@ -129,7 +129,7 @@ export async function markScheduledNotificationSent(id: string, history: AppNoti
     return result.rows[0] ? map(result.rows[0]) : null
 }
 
-export async function markScheduledNotificationFailed(id: string, error: unknown) {
+export async function markFailed(id: string, error: unknown) {
     const db = requirePool()
     const result = await db.query(
         `UPDATE app_notification_schedules

@@ -6,7 +6,7 @@ type VersionQuery = {
     lang?: string
 }
 
-export default async function VersionHandler(req: FastifyRequest, res: FastifyReply) {
+export default async function version(req: FastifyRequest, res: FastifyReply) {
     const { version, lang: queryLang } = req.query as VersionQuery
     const currentVersion = version?.trim() || '0.0.0'
     const lang = queryLang === 'no' ? queryLang : 'en'

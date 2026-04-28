@@ -1,9 +1,9 @@
 import config from '#constants'
-import { addNotificationHistoryEntry, listSubscriptions } from '#db'
+import { addHistoryEntry, listSubscriptions } from '#db'
 
 const expoTokenPattern = /^(Exponent|Expo)PushToken\[[^\]]+\]$/
 
-type SendTopicNotificationProps = {
+type TopicMessage = {
     title: string
     body: string
     topic?: string
@@ -16,12 +16,12 @@ type ExpoTicket = {
     message?: string
 }
 
-export async function sendTopicNotification({
+export async function sendTopic({
     title,
     body,
     topic = 'maintenance',
     data = {},
-}: SendTopicNotificationProps) {
+}: TopicMessage) {
     const subscriptions = await listSubscriptions()
     const tokens = subscriptions
         .filter((subscription) => subscription.topics.includes(topic))
@@ -29,7 +29,7 @@ export async function sendTopicNotification({
         .filter((token) => expoTokenPattern.test(token))
 
     if (!tokens.length) {
-        return await addNotificationHistoryEntry({
+        return await addHistoryEntry({
             title,
             body,
             topic,
@@ -42,7 +42,7 @@ export async function sendTopicNotification({
     }
 
     const tickets: ExpoTicket[] = []
-    for (const chunk of chunkArray(tokens, 100)) {
+    for (const chunk of chunks(tokens, 100)) {
         try {
             const response = await fetch(config.notifications.expoEndpoint, {
                 method: 'POST',
@@ -72,7 +72,7 @@ export async function sendTopicNotification({
         }
     }
 
-    return await addNotificationHistoryEntry({
+    return await addHistoryEntry({
         title,
         body,
         topic,
@@ -84,8 +84,8 @@ export async function sendTopicNotification({
     })
 }
 
-export async function resendNotification(entry: AppNotificationHistoryEntry) {
-    return await sendTopicNotification({
+export async function resendEntry(entry: AppNotificationHistoryEntry) {
+    return await sendTopic({
         title: entry.title,
         body: entry.body,
         topic: entry.topic,
@@ -93,7 +93,7 @@ export async function resendNotification(entry: AppNotificationHistoryEntry) {
     })
 }
 
-function chunkArray<T>(items: T[], size: number) {
+function chunks<T>(items: T[], size: number) {
     const chunks: T[][] = []
     for (let index = 0; index < items.length; index += size) {
         chunks.push(items.slice(index, index + size))

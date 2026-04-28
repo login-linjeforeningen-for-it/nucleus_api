@@ -27,7 +27,7 @@ type DesktopDownloadParams = {
 const updatesDir = path.resolve(process.env.APP_API_DESKTOP_UPDATES_DIR || path.join(process.cwd(), 'data', 'desktop'))
 const publicUrl = (process.env.APP_API_PUBLIC_URL || 'https://app.login.no').replace(/\/$/, '')
 
-export async function getDesktopManifestHandler(_: FastifyRequest, res: FastifyReply) {
+export async function manifest(_: FastifyRequest, res: FastifyReply) {
     const manifest = await readManifest()
 
     if (!manifest) {
@@ -37,7 +37,7 @@ export async function getDesktopManifestHandler(_: FastifyRequest, res: FastifyR
     return res.send(normalizeManifest(manifest))
 }
 
-export async function getDesktopUpdateHandler(req: FastifyRequest, res: FastifyReply) {
+export async function update(req: FastifyRequest, res: FastifyReply) {
     const { target, arch, currentVersion } = req.params as DesktopUpdateParams
     const manifest = await readManifest()
 
@@ -61,7 +61,7 @@ export async function getDesktopUpdateHandler(req: FastifyRequest, res: FastifyR
     })
 }
 
-export async function getDesktopDownloadHandler(req: FastifyRequest, res: FastifyReply) {
+export async function download(req: FastifyRequest, res: FastifyReply) {
     const { file } = req.params as DesktopDownloadParams
     const safeName = path.basename(file)
     const filePath = path.join(updatesDir, safeName)

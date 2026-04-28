@@ -1,19 +1,19 @@
 import config from '#constants'
 import {
-    getNotificationHistoryEntry,
+    getHistoryEntry,
     listNotificationHistory,
     removeSubscription,
     upsertSubscription,
 } from '#db'
 import {
-    cancelScheduledNotification,
-    createScheduledNotification,
-    getScheduledNotification,
-    listScheduledNotifications,
-    markScheduledNotificationFailed,
-    markScheduledNotificationSent,
+    cancelSchedule,
+    createSchedule,
+    getSchedule,
+    listSchedules,
+    markFailed,
+    markSent,
 } from '#utils/notifications/schedules.ts'
-import { resendNotification, sendTopicNotification } from '#utils/notifications/send.ts'
+import { resendEntry, sendTopic } from '#utils/notifications/send.ts'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 type SubscriptionBody = {
@@ -21,7 +21,7 @@ type SubscriptionBody = {
     topic?: string
 }
 
-type PostNotificationBody = {
+type MessageBody = {
     title?: string
     body?: string
     topic?: string
@@ -29,7 +29,7 @@ type PostNotificationBody = {
     screen?: Record<string, string | number | boolean | null>
 }
 
-type PostScheduledNotificationBody = {
+type ScheduleBody = {
     title?: string
     body?: string
     topic?: string
@@ -37,27 +37,27 @@ type PostScheduledNotificationBody = {
     scheduledAt?: string
 }
 
-export async function subscribeHandler(req: FastifyRequest, res: FastifyReply) {
-    return handleSubscription(req, res, upsertSubscription)
+export async function subscribe(req: FastifyRequest, res: FastifyReply) {
+    return subscription(req, res, upsertSubscription)
 }
 
-export async function unsubscribeHandler(req: FastifyRequest, res: FastifyReply) {
-    return handleSubscription(req, res, removeSubscription)
+export async function unsubscribe(req: FastifyRequest, res: FastifyReply) {
+    return subscription(req, res, removeSubscription)
 }
 
-export const getNotificationsHandler = withNotificationAdmin(async (req, res) => {
+export const history = adminOnly(async (req, res) => {
     const { limit } = (req.query || {}) as { limit?: string }
     const parsedLimit = Math.min(Math.max(Number(limit) || 25, 1), 100)
     return res.send(await listNotificationHistory(parsedLimit))
 })
 
-export const postNotificationHandler = withNotificationAdmin(async (req, res) => {
-    const { title, body, topic, data, screen } = (req.body || {}) as PostNotificationBody
+export const send = adminOnly(async (req, res) => {
+    const { title, body, topic, data, screen } = (req.body || {}) as MessageBody
     if (!title || !body) {
         return res.status(400).send({ error: 'Missing title or body' })
     }
 
-    const entry = await sendTopicNotification({
+    const entry = await sendTopic({
         title,
         body,
         topic,
@@ -70,30 +70,30 @@ export const postNotificationHandler = withNotificationAdmin(async (req, res) =>
     return res.send(entry)
 })
 
-export const resendNotificationHandler = withNotificationAdmin(async (req, res) => {
+export const resend = adminOnly(async (req, res) => {
     const { id } = req.params as { id: string }
-    const entry = await getNotificationHistoryEntry(id)
+    const entry = await getHistoryEntry(id)
     if (!entry) {
         return res.status(404).send({ error: 'Notification not found' })
     }
 
-    return res.send(await resendNotification(entry))
+    return res.send(await resendEntry(entry))
 })
 
-export const getScheduledNotificationsHandler = withNotificationAdmin(async (
+export const scheduled = adminOnly(async (
     req: FastifyRequest<{ Querystring: { limit?: string } }>,
     res
 ) => {
     try {
         const limit = Number(req.query.limit || 25)
-        return res.send(await listScheduledNotifications(limit))
+        return res.send(await listSchedules(limit))
     } catch (error) {
         return res.status(503).send({ error: (error as Error).message })
     }
 })
 
-export const postScheduledNotificationHandler = withNotificationAdmin(async (req, res) => {
-    const { title, body, topic, data, scheduledAt } = (req.body || {}) as PostScheduledNotificationBody
+export const schedule = adminOnly(async (req, res) => {
+    const { title, body, topic, data, scheduledAt } = (req.body || {}) as ScheduleBody
     if (!title || !body || !scheduledAt) {
         return res.status(400).send({ error: 'Missing title, body or scheduledAt' })
     }
@@ -104,7 +104,7 @@ export const postScheduledNotificationHandler = withNotificationAdmin(async (req
     }
 
     try {
-        return res.send(await createScheduledNotification({
+        return res.send(await createSchedule({
             title,
             body,
             topic: topic || 'maintenance',
@@ -117,12 +117,12 @@ export const postScheduledNotificationHandler = withNotificationAdmin(async (req
     }
 })
 
-export const deleteScheduledNotificationHandler = withNotificationAdmin(async (
+export const cancel = adminOnly(async (
     req: FastifyRequest<{ Params: { id: string } }>,
     res
 ) => {
     try {
-        const notification = await cancelScheduledNotification(req.params.id)
+        const notification = await cancelSchedule(req.params.id)
         if (!notification) {
             return res.status(404).send({ error: 'Scheduled notification not found' })
         }
@@ -133,31 +133,31 @@ export const deleteScheduledNotificationHandler = withNotificationAdmin(async (
     }
 })
 
-export const runScheduledNotificationHandler = withNotificationAdmin(async (
+export const runNow = adminOnly(async (
     req: FastifyRequest<{ Params: { id: string } }>,
     res
 ) => {
-    const notification = await getScheduledNotification(req.params.id)
+    const notification = await getSchedule(req.params.id)
     if (!notification) {
         return res.status(404).send({ error: 'Scheduled notification not found' })
     }
 
     try {
-        const history = await sendTopicNotification({
+        const history = await sendTopic({
             title: notification.title,
             body: notification.body,
             topic: notification.topic,
             data: notification.data,
         })
 
-        return res.send(await markScheduledNotificationSent(notification.id, history))
+        return res.send(await markSent(notification.id, history))
     } catch (error) {
-        await markScheduledNotificationFailed(notification.id, error)
+        await markFailed(notification.id, error)
         return res.status(500).send({ error: (error as Error).message })
     }
 })
 
-async function handleSubscription(
+async function subscription(
     req: FastifyRequest,
     res: FastifyReply,
     update: (token: string, topic: string) => Promise<void>
@@ -172,11 +172,11 @@ async function handleSubscription(
     return res.send({ success: true })
 }
 
-function withNotificationAdmin<Request extends FastifyRequest>(
+function adminOnly<Request extends FastifyRequest>(
     handler: (req: Request, res: FastifyReply) => Promise<unknown>
 ) {
     return async (req: Request, res: FastifyReply) => {
-        if (!requireNotificationAdmin(req, res)) {
+        if (!isAdmin(req, res)) {
             return
         }
 
@@ -184,7 +184,7 @@ function withNotificationAdmin<Request extends FastifyRequest>(
     }
 }
 
-function requireNotificationAdmin(req: FastifyRequest, res: FastifyReply) {
+function isAdmin(req: FastifyRequest, res: FastifyReply) {
     const configuredToken = config.notifications.adminToken
     if (!configuredToken) {
         return true

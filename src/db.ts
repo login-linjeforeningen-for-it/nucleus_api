@@ -224,14 +224,14 @@ export async function listNotificationHistory(limit = 25) {
     return result.rows.map(mapHistoryEntry)
 }
 
-export async function getNotificationHistoryEntry(id: string) {
+export async function getHistoryEntry(id: string) {
     const db = requirePool()
     await initializeDatabase()
     const result = await db.query(`SELECT * FROM app_notification_history WHERE id = $1`, [id])
     return result.rows[0] ? mapHistoryEntry(result.rows[0]) : null
 }
 
-export async function addNotificationHistoryEntry(entry: Omit<AppNotificationHistoryEntry, 'id'>) {
+export async function addHistoryEntry(entry: Omit<AppNotificationHistoryEntry, 'id'>) {
     const db = requirePool()
     await initializeDatabase()
     const id = randomUUID()

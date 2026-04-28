@@ -1,10 +1,10 @@
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify'
 import config from '#constants'
-import { sendTopicNotification } from '#utils/notifications/send.ts'
+import { sendTopic } from '#utils/notifications/send.ts'
 import {
-    claimDueScheduledNotifications,
-    markScheduledNotificationFailed,
-    markScheduledNotificationSent,
+    claimDueSchedules,
+    markFailed,
+    markSent,
 } from '#utils/notifications/schedules.ts'
 import { hasDatabase, initializeDatabase } from '#db'
 
@@ -19,18 +19,18 @@ async function flushDueNotifications(fastify: FastifyInstance) {
     running = true
     try {
         await initializeDatabase()
-        const items = await claimDueScheduledNotifications(10)
+        const items = await claimDueSchedules(10)
         for (const item of items) {
             try {
-                const history = await sendTopicNotification({
+                const history = await sendTopic({
                     title: item.title,
                     body: item.body,
                     topic: item.topic,
                     data: item.data,
                 })
-                await markScheduledNotificationSent(item.id, history)
+                await markSent(item.id, history)
             } catch (error) {
-                await markScheduledNotificationFailed(item.id, error)
+                await markFailed(item.id, error)
                 fastify.log.error(error)
             }
         }

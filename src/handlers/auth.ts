@@ -2,7 +2,7 @@ import config from '#constants'
 import { buildProfile, fetchCoreUser, fetchUserInfo, getBearerToken } from '#utils/auth.ts'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-const ALLOWED_REDIRECT_PREFIXES = ['login://', 'exp://']
+const REDIRECT_PREFIXES = ['login://', 'exp://']
 
 type LoginQuery = {
     redirect_uri?: string
@@ -16,7 +16,7 @@ type UserInfo = {
     groups?: string[]
 }
 
-export async function authLogin(req: FastifyRequest<{ Querystring: LoginQuery }>, res: FastifyReply) {
+export async function login(req: FastifyRequest<{ Querystring: LoginQuery }>, res: FastifyReply) {
     if (!config.auth.clientId) {
         req.log.error('Missing AUTHENTIK_CLIENT_ID for auth login')
         return res.status(500).send({ error: 'Authentication is not configured' })
@@ -37,7 +37,7 @@ export async function authLogin(req: FastifyRequest<{ Querystring: LoginQuery }>
     return res.redirect(`${config.auth.baseUrl}/application/o/authorize/?${params.toString()}`)
 }
 
-export async function authCallback(
+export async function callback(
     req: FastifyRequest<{ Querystring: { code?: string, state?: string } }>,
     res: FastifyReply
 ) {
@@ -96,7 +96,7 @@ export async function authCallback(
     }
 }
 
-export async function authMe(req: FastifyRequest, res: FastifyReply) {
+export async function me(req: FastifyRequest, res: FastifyReply) {
     const token = getBearerToken(req.headers.authorization)
     if (!token) {
         return res.status(401).send({ error: 'Missing or invalid Authorization header' })
@@ -151,17 +151,17 @@ function parseState(state: string | undefined) {
 
 function normalizeAppRedirectUri(value: string | undefined) {
     const redirectUri = value || config.auth.defaultRedirectUri
-    const defaultRedirectUri = normalizeExpoDevClientScheme(config.auth.defaultRedirectUri)
-    const nativeRedirectUri = normalizeExpoDevClientScheme(redirectUri)
+    const defaultRedirectUri = expoScheme(config.auth.defaultRedirectUri)
+    const nativeRedirectUri = expoScheme(redirectUri)
 
-    if (ALLOWED_REDIRECT_PREFIXES.some(prefix => nativeRedirectUri.startsWith(prefix))) {
+    if (REDIRECT_PREFIXES.some(prefix => nativeRedirectUri.startsWith(prefix))) {
         return nativeRedirectUri
     }
 
     return defaultRedirectUri
 }
 
-function normalizeExpoDevClientScheme(value: string) {
+function expoScheme(value: string) {
     const match = value.match(/^exp\+([a-z][a-z0-9+.-]*:\/\/.*)$/i)
     return match?.[1] || value
 }
