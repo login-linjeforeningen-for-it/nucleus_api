@@ -38,42 +38,20 @@ type PostScheduledNotificationBody = {
 }
 
 export async function subscribeHandler(req: FastifyRequest, res: FastifyReply) {
-    const { token, topic } = (req.body || {}) as SubscriptionBody
-
-    if (!token || !topic) {
-        return res.status(400).send({ error: 'Missing token or topic' })
-    }
-
-    await upsertSubscription(token, topic)
-    return res.send({ success: true })
+    return handleSubscription(req, res, upsertSubscription)
 }
 
 export async function unsubscribeHandler(req: FastifyRequest, res: FastifyReply) {
-    const { token, topic } = (req.body || {}) as SubscriptionBody
-
-    if (!token || !topic) {
-        return res.status(400).send({ error: 'Missing token or topic' })
-    }
-
-    await removeSubscription(token, topic)
-    return res.send({ success: true })
+    return handleSubscription(req, res, removeSubscription)
 }
 
-export async function getNotificationsHandler(req: FastifyRequest, res: FastifyReply) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+export const getNotificationsHandler = withNotificationAdmin(async (req, res) => {
     const { limit } = (req.query || {}) as { limit?: string }
     const parsedLimit = Math.min(Math.max(Number(limit) || 25, 1), 100)
     return res.send(await listNotificationHistory(parsedLimit))
-}
+})
 
-export async function postNotificationHandler(req: FastifyRequest, res: FastifyReply) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+export const postNotificationHandler = withNotificationAdmin(async (req, res) => {
     const { title, body, topic, data, screen } = (req.body || {}) as PostNotificationBody
     if (!title || !body) {
         return res.status(400).send({ error: 'Missing title or body' })
@@ -90,13 +68,9 @@ export async function postNotificationHandler(req: FastifyRequest, res: FastifyR
     })
 
     return res.send(entry)
-}
+})
 
-export async function resendNotificationHandler(req: FastifyRequest, res: FastifyReply) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+export const resendNotificationHandler = withNotificationAdmin(async (req, res) => {
     const { id } = req.params as { id: string }
     const entry = await getNotificationHistoryEntry(id)
     if (!entry) {
@@ -104,29 +78,21 @@ export async function resendNotificationHandler(req: FastifyRequest, res: Fastif
     }
 
     return res.send(await resendNotification(entry))
-}
+})
 
-export async function getScheduledNotificationsHandler(
+export const getScheduledNotificationsHandler = withNotificationAdmin(async (
     req: FastifyRequest<{ Querystring: { limit?: string } }>,
-    res: FastifyReply
-) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+    res
+) => {
     try {
         const limit = Number(req.query.limit || 25)
         return res.send(await listScheduledNotifications(limit))
     } catch (error) {
         return res.status(503).send({ error: (error as Error).message })
     }
-}
+})
 
-export async function postScheduledNotificationHandler(req: FastifyRequest, res: FastifyReply) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+export const postScheduledNotificationHandler = withNotificationAdmin(async (req, res) => {
     const { title, body, topic, data, scheduledAt } = (req.body || {}) as PostScheduledNotificationBody
     if (!title || !body || !scheduledAt) {
         return res.status(400).send({ error: 'Missing title, body or scheduledAt' })
@@ -149,16 +115,12 @@ export async function postScheduledNotificationHandler(req: FastifyRequest, res:
     } catch (error) {
         return res.status(503).send({ error: (error as Error).message })
     }
-}
+})
 
-export async function deleteScheduledNotificationHandler(
+export const deleteScheduledNotificationHandler = withNotificationAdmin(async (
     req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply
-) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+    res
+) => {
     try {
         const notification = await cancelScheduledNotification(req.params.id)
         if (!notification) {
@@ -169,16 +131,12 @@ export async function deleteScheduledNotificationHandler(
     } catch (error) {
         return res.status(503).send({ error: (error as Error).message })
     }
-}
+})
 
-export async function runScheduledNotificationHandler(
+export const runScheduledNotificationHandler = withNotificationAdmin(async (
     req: FastifyRequest<{ Params: { id: string } }>,
-    res: FastifyReply
-) {
-    if (!requireNotificationAdmin(req, res)) {
-        return
-    }
-
+    res
+) => {
     const notification = await getScheduledNotification(req.params.id)
     if (!notification) {
         return res.status(404).send({ error: 'Scheduled notification not found' })
@@ -196,6 +154,33 @@ export async function runScheduledNotificationHandler(
     } catch (error) {
         await markScheduledNotificationFailed(notification.id, error)
         return res.status(500).send({ error: (error as Error).message })
+    }
+})
+
+async function handleSubscription(
+    req: FastifyRequest,
+    res: FastifyReply,
+    update: (token: string, topic: string) => Promise<void>
+) {
+    const { token, topic } = (req.body || {}) as SubscriptionBody
+
+    if (!token || !topic) {
+        return res.status(400).send({ error: 'Missing token or topic' })
+    }
+
+    await update(token, topic)
+    return res.send({ success: true })
+}
+
+function withNotificationAdmin<Request extends FastifyRequest>(
+    handler: (req: Request, res: FastifyReply) => Promise<unknown>
+) {
+    return async (req: Request, res: FastifyReply) => {
+        if (!requireNotificationAdmin(req, res)) {
+            return
+        }
+
+        return handler(req, res)
     }
 }
 
