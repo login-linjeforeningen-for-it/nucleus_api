@@ -1,7 +1,6 @@
 import cors from '@fastify/cors'
 import Fastify from 'fastify'
-import routes from './routes.ts'
-import index from './handlers/index.ts'
+import routes, { index } from './routes.ts'
 import notificationScheduler from './plugins/notificationScheduler.ts'
 
 const fastify = Fastify({

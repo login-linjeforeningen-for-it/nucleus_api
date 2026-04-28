@@ -1,5 +1,4 @@
-import type { FastifyInstance, FastifyPluginOptions } from 'fastify'
-import index from './handlers/index.ts'
+import type { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify'
 import {
     games,
     neverHaveIEver,
@@ -20,6 +19,19 @@ import {
     unsubscribe,
 } from './handlers/notifications.ts'
 import { download, manifest, update } from './handlers/desktop.ts'
+
+let indexBuffer: Buffer | null = null
+
+export function index(req: FastifyRequest, res: FastifyReply) {
+    if (!indexBuffer) {
+        const routes = req.server.printRoutes({ commonPrefix: false })
+        const body = `Welcome to the Nucleus API!\n\nValid routes are:\n${routes}`
+        indexBuffer = Buffer.from(body, 'utf-8')
+    }
+
+    res.header('Content-Type', 'text/plain; charset=utf-8')
+    return res.send(indexBuffer)
+}
 
 /**
  * Defines the routes available in the API.
