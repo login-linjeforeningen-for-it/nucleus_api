@@ -15,11 +15,11 @@ export default async function VersionHandler(req: FastifyRequest, res: FastifyRe
     const updateMessages = {
         no: {
             title: 'Oppdatering tilgjengelig!',
-            body: 'Gode nyheter! En ny versjon er tilgjengelig 😃'
+            body: 'Gode nyheter! En ny versjon er tilgjengelig. 😃'
         },
         en: {
             title: 'New update available!',
-            body: 'Good news! A new version is available 😃'
+            body: 'Good news! A new version is available. 😃'
         }
     }
 

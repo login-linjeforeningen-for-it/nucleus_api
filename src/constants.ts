@@ -13,7 +13,7 @@ const config = {
         baseUrl: process.env.AUTHENTIK_URL || 'https://authentik.login.no',
         clientId: process.env.AUTHENTIK_CLIENT_ID || '',
         clientSecret: process.env.AUTHENTIK_CLIENT_SECRET || '',
-        apiToken: process.env.AUTHENTIK_TOKEN || '',
+        apiToken: process.env.AUTHENTIK_API_TOKEN || process.env.AUTHENTIK_TOKEN || '',
         callbackUrl: process.env.APP_AUTH_CALLBACK_URL || 'https://app.login.no/api/auth/callback',
         defaultRedirectUri: process.env.NUCLEUS_APP_REDIRECT_URI || 'login://auth',
     }
