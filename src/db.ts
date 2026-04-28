@@ -6,27 +6,6 @@ let pool: Pool | null = null
 let initialized = false
 let initializationPromise: Promise<void> | null = null
 
-function mapScheduledNotification(row: Record<string, unknown>): ScheduledNotificationRecord {
-    return {
-        id: String(row.id),
-        title: String(row.title),
-        body: String(row.body),
-        topic: String(row.topic),
-        data: (row.data || {}) as Record<string, string>,
-        scheduledAt: new Date(String(row.scheduled_at)).toISOString(),
-        status: String(row.status) as ScheduledNotificationStatus,
-        createdAt: new Date(String(row.created_at)).toISOString(),
-        updatedAt: new Date(String(row.updated_at)).toISOString(),
-        sentAt: row.sent_at ? new Date(String(row.sent_at)).toISOString() : null,
-        cancelledAt: row.cancelled_at ? new Date(String(row.cancelled_at)).toISOString() : null,
-        lastError: row.last_error ? String(row.last_error) : null,
-        delivered: typeof row.delivered === 'number' ? row.delivered : row.delivered === null ? null : Number(row.delivered),
-        failed: typeof row.failed === 'number' ? row.failed : row.failed === null ? null : Number(row.failed),
-        historyId: row.history_id ? String(row.history_id) : null,
-        createdBy: row.created_by ? String(row.created_by) : null,
-    }
-}
-
 function mapSubscription(row: Record<string, unknown>): AppNotificationSubscription {
     return {
         token: String(row.token),
@@ -66,6 +45,15 @@ export function getPool() {
     }
 
     return pool
+}
+
+export function requirePool() {
+    const db = getPool()
+    if (!db) {
+        throw new Error('APP_API_DATABASE_URL is not configured')
+    }
+
+    return db
 }
 
 export async function initializeDatabase() {
@@ -149,30 +137,8 @@ async function initializeDatabaseSchema() {
 
 }
 
-export async function listScheduledNotifications(limit = 50) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
-    await initializeDatabase()
-    const result = await db.query(
-        `SELECT *
-         FROM app_notification_schedules
-         ORDER BY scheduled_at DESC, created_at DESC
-         LIMIT $1`,
-        [limit]
-    )
-
-    return result.rows.map(mapScheduledNotification)
-}
-
 export async function listSubscriptions() {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const result = await db.query(
         `SELECT token, topics, created_at, updated_at
@@ -184,11 +150,7 @@ export async function listSubscriptions() {
 }
 
 export async function upsertSubscription(token: string, topic: string) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const existing = await db.query(
         `SELECT token, topics, created_at, updated_at
@@ -218,11 +180,7 @@ export async function upsertSubscription(token: string, topic: string) {
 }
 
 export async function removeSubscription(token: string, topic: string) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const existing = await db.query(
         `SELECT token, topics, created_at, updated_at
@@ -253,11 +211,7 @@ export async function removeSubscription(token: string, topic: string) {
 }
 
 export async function listNotificationHistory(limit = 25) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const result = await db.query(
         `SELECT *
@@ -271,22 +225,14 @@ export async function listNotificationHistory(limit = 25) {
 }
 
 export async function getNotificationHistoryEntry(id: string) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const result = await db.query(`SELECT * FROM app_notification_history WHERE id = $1`, [id])
     return result.rows[0] ? mapHistoryEntry(result.rows[0]) : null
 }
 
 export async function addNotificationHistoryEntry(entry: Omit<AppNotificationHistoryEntry, 'id'>) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const id = randomUUID()
     const result = await db.query(

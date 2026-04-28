@@ -2,7 +2,6 @@ import config from '#constants'
 import {
     getNotificationHistoryEntry,
     listNotificationHistory,
-    listScheduledNotifications,
     removeSubscription,
     upsertSubscription,
 } from '#db'
@@ -10,6 +9,7 @@ import {
     cancelScheduledNotification,
     createScheduledNotification,
     getScheduledNotification,
+    listScheduledNotifications,
     markScheduledNotificationFailed,
     markScheduledNotificationSent,
 } from '#utils/notifications/schedules.ts'

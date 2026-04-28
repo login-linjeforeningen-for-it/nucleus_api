@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { getPool, initializeDatabase } from '#db'
+import { getPool, initializeDatabase, requirePool } from '#db'
 
 type CreateScheduledNotificationInput = {
     title: string
@@ -11,11 +11,7 @@ type CreateScheduledNotificationInput = {
 }
 
 export async function createScheduledNotification(input: CreateScheduledNotificationInput) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const id = randomUUID()
     const result = await db.query(
@@ -38,11 +34,7 @@ export async function createScheduledNotification(input: CreateScheduledNotifica
 }
 
 export async function cancelScheduledNotification(id: string) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const result = await db.query(
         `UPDATE app_notification_schedules
@@ -59,14 +51,24 @@ export async function cancelScheduledNotification(id: string) {
 }
 
 export async function getScheduledNotification(id: string) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     await initializeDatabase()
     const result = await db.query(`SELECT * FROM app_notification_schedules WHERE id = $1`, [id])
     return result.rows[0] ? map(result.rows[0]) : null
+}
+
+export async function listScheduledNotifications(limit = 50) {
+    const db = requirePool()
+    await initializeDatabase()
+    const result = await db.query(
+        `SELECT *
+         FROM app_notification_schedules
+         ORDER BY scheduled_at DESC, created_at DESC
+         LIMIT $1`,
+        [limit]
+    )
+
+    return result.rows.map(map)
 }
 
 export async function claimDueScheduledNotifications(limit = 5) {
@@ -109,11 +111,7 @@ export async function claimDueScheduledNotifications(limit = 5) {
 }
 
 export async function markScheduledNotificationSent(id: string, history: AppNotificationHistoryEntry) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     const result = await db.query(
         `UPDATE app_notification_schedules
          SET status = 'sent',
@@ -132,11 +130,7 @@ export async function markScheduledNotificationSent(id: string, history: AppNoti
 }
 
 export async function markScheduledNotificationFailed(id: string, error: unknown) {
-    const db = getPool()
-    if (!db) {
-        throw new Error('APP_API_DATABASE_URL is not configured')
-    }
-
+    const db = requirePool()
     const result = await db.query(
         `UPDATE app_notification_schedules
          SET status = 'failed',
