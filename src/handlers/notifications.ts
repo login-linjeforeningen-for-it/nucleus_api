@@ -80,19 +80,15 @@ export const resend = adminOnly(async (req, res) => {
     return res.send(await resendEntry(entry))
 })
 
-export const scheduled = adminOnly(async (
+export const scheduled = dbAdmin(async (
     req: FastifyRequest<{ Querystring: { limit?: string } }>,
     res
 ) => {
-    try {
-        const limit = Number(req.query.limit || 25)
-        return res.send(await listSchedules(limit))
-    } catch (error) {
-        return res.status(503).send({ error: (error as Error).message })
-    }
+    const limit = Number(req.query.limit || 25)
+    return res.send(await listSchedules(limit))
 })
 
-export const schedule = adminOnly(async (req, res) => {
+export const schedule = dbAdmin(async (req, res) => {
     const { title, body, topic, data, scheduledAt } = (req.body || {}) as ScheduleBody
     if (!title || !body || !scheduledAt) {
         return res.status(400).send({ error: 'Missing title, body or scheduledAt' })
@@ -103,34 +99,26 @@ export const schedule = adminOnly(async (req, res) => {
         return res.status(400).send({ error: 'Invalid scheduledAt value' })
     }
 
-    try {
-        return res.send(await createSchedule({
-            title,
-            body,
-            topic: topic || 'maintenance',
-            data: data || {},
-            scheduledAt: parsedDate.toISOString(),
-            createdBy: req.headers['x-user-email']?.toString() || null,
-        }))
-    } catch (error) {
-        return res.status(503).send({ error: (error as Error).message })
-    }
+    return res.send(await createSchedule({
+        title,
+        body,
+        topic: topic || 'maintenance',
+        data: data || {},
+        scheduledAt: parsedDate.toISOString(),
+        createdBy: req.headers['x-user-email']?.toString() || null,
+    }))
 })
 
-export const cancel = adminOnly(async (
+export const cancel = dbAdmin(async (
     req: FastifyRequest<{ Params: { id: string } }>,
     res
 ) => {
-    try {
-        const notification = await cancelSchedule(req.params.id)
-        if (!notification) {
-            return res.status(404).send({ error: 'Scheduled notification not found' })
-        }
-
-        return res.send(notification)
-    } catch (error) {
-        return res.status(503).send({ error: (error as Error).message })
+    const notification = await cancelSchedule(req.params.id)
+    if (!notification) {
+        return res.status(404).send({ error: 'Scheduled notification not found' })
     }
+
+    return res.send(notification)
 })
 
 export const runNow = adminOnly(async (
@@ -182,6 +170,18 @@ function adminOnly<Request extends FastifyRequest>(
 
         return handler(req, res)
     }
+}
+
+function dbAdmin<Request extends FastifyRequest>(
+    handler: (req: Request, res: FastifyReply) => Promise<unknown>
+) {
+    return adminOnly(async (req: Request, res) => {
+        try {
+            return await handler(req, res)
+        } catch (error) {
+            return res.status(503).send({ error: (error as Error).message })
+        }
+    })
 }
 
 function isAdmin(req: FastifyRequest, res: FastifyReply) {
