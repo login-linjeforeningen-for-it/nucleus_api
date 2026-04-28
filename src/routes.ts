@@ -1,29 +1,29 @@
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify'
-import IndexHandler from './handlers/index/index.ts'
+import getIndex from './handlers/index.ts'
 import {
     getGames,
     getNeverHaveIEver,
     getOkRedFlagDealBreaker,
     getQuestions,
 } from './handlers/games.ts'
-import VersionHandler from './handlers/version/version.ts'
-import AuthLoginHandler from './handlers/auth/login.ts'
-import AuthCallbackHandler from './handlers/auth/callback.ts'
-import AuthMeHandler from './handlers/auth/me.ts'
-import subscribeHandler from './handlers/notifications/subscribe.ts'
-import unsubscribeHandler from './handlers/notifications/unsubscribe.ts'
-import postNotificationHandler from './handlers/notifications/post.ts'
-import getNotificationsHandler from './handlers/notifications/get.ts'
-import resendNotificationHandler from './handlers/notifications/resend.ts'
-import getScheduledNotificationsHandler from './handlers/notifications/getScheduled.ts'
-import postScheduledNotificationHandler from './handlers/notifications/postScheduled.ts'
-import deleteScheduledNotificationHandler from './handlers/notifications/deleteScheduled.ts'
-import runScheduledNotificationHandler from './handlers/notifications/runScheduled.ts'
+import VersionHandler from './handlers/version.ts'
+import { authCallback, authLogin, authMe } from './handlers/auth.ts'
+import {
+    deleteScheduledNotificationHandler,
+    getNotificationsHandler,
+    getScheduledNotificationsHandler,
+    postNotificationHandler,
+    postScheduledNotificationHandler,
+    resendNotificationHandler,
+    runScheduledNotificationHandler,
+    subscribeHandler,
+    unsubscribeHandler,
+} from './handlers/notifications.ts'
 import {
     getDesktopDownloadHandler,
     getDesktopManifestHandler,
     getDesktopUpdateHandler,
-} from './handlers/desktop/desktop.ts'
+} from './handlers/desktop.ts'
 
 /**
  * Defines the routes available in the API.
@@ -33,7 +33,7 @@ import {
  */
 export default async function apiRoutes(fastify: FastifyInstance, _: FastifyPluginOptions) {
     // Index handler
-    fastify.get('/', IndexHandler)
+    fastify.get('/', getIndex)
 
     // Game handlers
     fastify.get('/games', getGames)
@@ -51,9 +51,9 @@ export default async function apiRoutes(fastify: FastifyInstance, _: FastifyPlug
     fastify.get('/desktop/download/:file', getDesktopDownloadHandler)
 
     // Auth handlers
-    fastify.get('/auth/login', AuthLoginHandler)
-    fastify.get('/auth/callback', AuthCallbackHandler)
-    fastify.get('/auth/me', AuthMeHandler)
+    fastify.get('/auth/login', authLogin)
+    fastify.get('/auth/callback', authCallback)
+    fastify.get('/auth/me', authMe)
 
     // Notification handlers
     fastify.post('/subscribe', subscribeHandler)
