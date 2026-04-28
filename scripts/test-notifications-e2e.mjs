@@ -6,7 +6,7 @@ const apiPort = 18088
 const expoPort = 19090
 const postgresPort = 55432
 const adminToken = 'test-admin-token'
-const containerName = `app-api-e2e-${Date.now()}`
+const containerName = `app-e2e-${Date.now()}`
 const expoRequests = []
 
 const expoServer = http.createServer((req, res) => {
@@ -48,7 +48,7 @@ async function main() {
             '-e',
             'POSTGRES_USER=app',
             '-e',
-            'POSTGRES_DB=app_api',
+            'POSTGRES_DB=app',
             '-p',
             `${postgresPort}:5432`,
             'postgres:16-alpine',
@@ -57,7 +57,7 @@ async function main() {
         await waitForPort(postgresPort)
         await waitFor(async () => {
             try {
-                await runCommand('docker', ['exec', containerName, 'pg_isready', '-U', 'app', '-d', 'app_api'])
+                await runCommand('docker', ['exec', containerName, 'pg_isready', '-U', 'app', '-d', 'app'])
                 return true
             } catch {
                 return false
@@ -152,7 +152,7 @@ async function startApi() {
             ...process.env,
             PORT: String(apiPort),
             APP_API_ADMIN_TOKEN: adminToken,
-            APP_API_DATABASE_URL: `postgresql://app:app@127.0.0.1:${postgresPort}/app_api`,
+            APP_API_DATABASE_URL: `postgresql://app:app@127.0.0.1:${postgresPort}/app`,
             EXPO_PUSH_ENDPOINT: `http://127.0.0.1:${expoPort}/push/send`,
             APP_API_SCHEDULER_INTERVAL_MS: '1000',
         },

@@ -5,7 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 const apiPort = Number(process.env.APP_API_DESKTOP_TEST_PORT || 23000 + Math.floor(Math.random() * 10000))
-const updatesDir = await mkdtemp(path.join(os.tmpdir(), 'app-api-desktop-updates-'))
+const updatesDir = await mkdtemp(path.join(os.tmpdir(), 'app-desktop-updates-'))
 const artifactName = 'Login Desktop.app.tar.gz'
 const artifactBody = 'signed desktop artifact'
 

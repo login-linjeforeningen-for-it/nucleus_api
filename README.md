@@ -1,6 +1,6 @@
-# App API
+# App
 
-App API hosts shared backend endpoints for the Login applications. It is a
+App hosts shared backend endpoints for the Login applications. It is a
 TypeScript/Bun Fastify service with Docker Compose support for local and server
 deployments.
 

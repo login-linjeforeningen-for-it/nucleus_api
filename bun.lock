@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "app-api",
+      "name": "app",
       "dependencies": {
         "@fastify/cors": "^11.2.0",
         "@types/pg": "^8.20.0",

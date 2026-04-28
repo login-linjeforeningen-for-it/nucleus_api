@@ -1,7 +1,7 @@
 services:
-  app_api:
-    container_name: app_api
-    image: app_api
+  app:
+    container_name: app
+    image: app
     restart: always
     build:
       context: .
@@ -12,10 +12,10 @@ services:
       - ../queenbee/.env
       - ../beekeeper/.env
     depends_on:
-      app_api_database:
+      app_database:
         condition: service_healthy
     environment:
-      - APP_API_DATABASE_URL=postgresql://app_api:app_api@app_api_database:5432/app_api
+      - APP_API_DATABASE_URL=postgresql://app:app@app_database:5432/app
       - APP_API_PUBLIC_URL=${APP_API_PUBLIC_URL:-https://app.login.no}
       - APP_API_DESKTOP_UPDATES_DIR=/app/data/desktop
     volumes:
@@ -23,22 +23,22 @@ services:
     mem_limit: 1g
     cpus: "2.0"
 
-  app_api_database:
+  app_database:
     image: postgres:18
-    container_name: app_api_database
+    container_name: app_database
     restart: always
     environment:
-      POSTGRES_USER: app_api
-      POSTGRES_PASSWORD: app_api
-      POSTGRES_DB: app_api
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
     volumes:
-      - app_api_postgres_data:/var/lib/postgresql
+      - app_postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app_api -d app_api"]
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
       interval: 5s
       retries: 5
     mem_limit: 1g
     cpus: "2.0"
 
 volumes:
-  app_api_postgres_data:
+  app_postgres_data:

@@ -1,5 +1,5 @@
 {
-    "name": "app-api",
+    "name": "app",
     "version": "1.5.3",
     "description": "API for the Login app",
     "main": "index.ts",
