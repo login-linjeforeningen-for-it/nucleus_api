@@ -11,6 +11,8 @@ export default async function version(req: FastifyRequest, res: FastifyReply) {
     const currentVersion = version?.trim() || '0.0.0'
     const lang = queryLang === 'no' ? queryLang : 'en'
     const forceUpdate = isVersionBelow(currentVersion, config.minVersion)
+    const optionalUpdate = !!config.latestVersion && isVersionBelow(currentVersion, config.latestVersion)
+    const updateAvailable = forceUpdate || optionalUpdate
 
     const updateMessages = {
         no: {
@@ -34,6 +36,15 @@ export default async function version(req: FastifyRequest, res: FastifyReply) {
         }
     }
 
+    if (!updateAvailable) {
+        return res.send({
+            updateRequired: false,
+            updateAvailable: false,
+            update: null,
+            buttons: []
+        })
+    }
+
     const message = forceUpdate ? forcedUpdateMessages[lang] : updateMessages[lang]
     const buttons = forceUpdate
         ? [{ text: lang === 'no' ? 'Oppdater nå' : 'Update Now', action: 'update' }]
@@ -44,6 +55,7 @@ export default async function version(req: FastifyRequest, res: FastifyReply) {
 
     res.send({
         updateRequired: forceUpdate,
+        updateAvailable,
         update: message,
         buttons
     })

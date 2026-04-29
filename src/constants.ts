@@ -1,5 +1,6 @@
 const config = {
     minVersion: '2.4.0',
+    latestVersion: process.env.APP_API_LATEST_VERSION || '',
     database: {
         url: process.env.APP_API_DATABASE_URL || process.env.DATABASE_URL || '',
     },
